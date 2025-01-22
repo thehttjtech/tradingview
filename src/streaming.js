@@ -1,7 +1,7 @@
 import { parseFullSymbol, apiKey } from "./helpers.js";
 
 const socket = new WebSocket(
-  "wss://streamer.cryptocompare.com/v2?api_key=" + apiKey
+  "wss://mobile-service-dev.is6.com/mt4/rate",
 );
 const channelToSubscription = new Map();
 
@@ -25,9 +25,9 @@ socket.addEventListener("message", (event) => {
     M: exchange,
     FSYM: fromSymbol,
     TSYM: toSymbol,
-    TS: tradeTimeStr,
-    P: tradePriceStr,
-  } = data;
+    TS: tradeTimeStr, //time
+    P: tradePriceStr, //price
+  } = data.data;
 
   if (parseInt(eventTypeStr) !== 0) {
     // Skip all non-trading events
@@ -35,7 +35,8 @@ socket.addEventListener("message", (event) => {
   }
   const tradePrice = parseFloat(tradePriceStr);
   const tradeTime = parseInt(tradeTimeStr);
-  const channelString = `0~${exchange}~${fromSymbol}~${toSymbol}`;
+  const syml = `${fromSymbol}${toSymbol}`;
+  const channelString = `0~${exchange}~${syml}`;
   const subscriptionItem = channelToSubscription.get(channelString);
   if (subscriptionItem === undefined) {
     return;
@@ -44,7 +45,7 @@ socket.addEventListener("message", (event) => {
   const nextDailyBarTime = getNextDailyBarTime(lastDailyBar.time);
 
   let bar;
-  if (tradeTime >= nextDailyBarTime) {
+  if (tradeTime * 1000 >= nextDailyBarTime) {
     bar = {
       time: nextDailyBarTime,
       open: tradePrice,
@@ -69,9 +70,9 @@ socket.addEventListener("message", (event) => {
 });
 
 function getNextDailyBarTime(barTime) {
-  const date = new Date(barTime * 1000);
-  date.setDate(date.getDate() + 1);
-  return date.getTime() / 1000;
+  const date = new Date(barTime);
+  date.setMinutes(date.getMinutes() + 1);
+  return date.getTime();
 }
 
 export function subscribeOnStream(
@@ -83,7 +84,11 @@ export function subscribeOnStream(
   lastDailyBar
 ) {
   const parsedSymbol = parseFullSymbol(symbolInfo.full_name);
-  const channelString = `0~${parsedSymbol.exchange}~${parsedSymbol.fromSymbol}~${parsedSymbol.toSymbol}`;
+  const query = {
+    exchange: 'IS6',
+    symbol: symbolInfo.name,
+  }
+  const channelString = `0~${query.exchange}~${query.symbol}`;
   const handler = {
     id: subscriberUID,
     callback: onRealtimeCallback,
