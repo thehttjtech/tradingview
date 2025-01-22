@@ -1,10 +1,10 @@
 // Get a CryptoCompare API key CryptoCompare https://www.cryptocompare.com/coins/guides/how-to-use-our-api/
 export const apiKey = "7c359d0d3b7f7fb84f7dde00eb1b122a3f7f3cde30721485a21a28e1e08ad286";
+const bearerToken = 'put your access token here';
 // Makes requests to CryptoCompare API
 export async function makeApiRequest(path) {
 	try {
-		const url = new URL(`https://mobile-service-dev.is6.com/${path}`);
-		const bearerToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0NTYsIm10NCI6WzEyMzQ1NiwxMjM0NTZdLCJtdDUiOlsxMjM0NTYsMTIzNDU2XSwiaWF0IjoxNzM3NDUwOTk4LCJleHAiOjE3MzgwNTA5OTh9.MsXrYivljVZp3iugfl6cvIuYYFJRElWNcTnAOtH_Vz8';
+		const url = new URL(`https://mobile-service-dev.is6.com/${path}`);		
 		const headers = {
 			Authorization: `Bearer ${bearerToken}`,
 			'Content-Type': 'application/json',
